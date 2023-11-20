@@ -1,4 +1,8 @@
 ﻿
+using MassTransit;
+using Microsoft.EntityFrameworkCore;
+using Order.API.Models.Context;
+
 namespace Order.API
 {
     public class Program
@@ -9,10 +13,23 @@ namespace Order.API
 
 
 
-            //builder.Services.AddControllers(); //mİCROSERVİCE İLE ÇALIŞACAĞIMIZDAN DOLAYI BURAYI YORUM SATIRI YAPTIK.LAZIM OLMAYAN MIDDLEWARELERİ KALDIRIYORUZ YANİ
+            builder.Services.AddControllers(); //mİCROSERVİCE İLE ÇALIŞACAĞIMIZDAN DOLAYI BURAYI YORUM SATIRI YAPTIK.LAZIM OLMAYAN MIDDLEWARELERİ KALDIRIYORUZ YANİ
 
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+
+            builder.Services.AddMassTransit(configurator =>
+            {
+                configurator.UsingRabbitMq((context, _configure) =>
+                {
+                    _configure.Host(builder.Configuration["RabbitMQ"]);
+                });
+            });
+
+            builder.Services.AddDbContext<OrderAPIDbContext>(options => options.UseSqlServer(
+                builder.Configuration.GetConnectionString("MSSQLServer")));
+
+
 
             var app = builder.Build();
 
@@ -23,9 +40,11 @@ namespace Order.API
                 app.UseSwaggerUI();
             //}
 
-            //app.UseHttpsRedirection(); // GEREK YOK.LAZIM OLMAYAN MIDDLEWARELERİ KALDIRIYORUZ YANİ
+            app.MapPost()
 
-            //app.UseAuthorization();   // GEREK YOK.LAZIM OLMAYAN MIDDLEWARELERİ KALDIRIYORUZ YANİ
+            app.UseHttpsRedirection(); // GEREK YOK.LAZIM OLMAYAN MIDDLEWARELERİ KALDIRIYORUZ YANİ
+
+            app.UseAuthorization();   // GEREK YOK.LAZIM OLMAYAN MIDDLEWARELERİ KALDIRIYORUZ YANİ
 
 
             app.MapControllers();
