@@ -4,6 +4,8 @@ using Microsoft.EntityFrameworkCore;
 using Order.API.Models.Context;
 using Order.API.ViewModels;
 using Order.API.Enums;
+using Shared.Events;
+using Shared.Messages;
 
 namespace Order.API
 {
@@ -42,7 +44,7 @@ namespace Order.API
             app.UseSwaggerUI();
             //}
 
-            app.MapPost("/create/order", async (CreateOrderVM model, OrderAPIDbContext context) =>
+            app.MapPost("/create/order", async (CreateOrderVM model, OrderAPIDbContext context, IPublishEndpoint publishEndpoint) =>
             {
                 Order.API.Models.Order order = new()
                 {
@@ -64,6 +66,21 @@ namespace Order.API
                                                       // inject etmiş olduk.Sonra o inject ettiğimiz nesneyle gittik VT ekledik.
 
                 await context.SaveChangesAsync(); // Ekleme işlemini VT nına yansıttık.
+
+                OrderCreatedEvent orderCreatedEvent = new()
+                {
+                    OrderId = order.Id,
+                    BuyerId = order.BuyerId,// Burda VM danda model.BuyerId şekilde alabilirdik.Zaten VM ile Clientten alınıp ana modele atanıyor.
+                    TotalPrice = order.TotalPrice,
+                    OrderItemsMessage = order.OrderItems.Select(oi => new OrderItemMessage()
+                    {
+                        ProductId = oi.ProductId,
+                        Count = oi.Count,
+                        Price = oi.Price
+                    }).ToList()
+                };
+
+                await publishEndpoint.Publish(orderCreatedEvent); // Oluşturduğumuz Eventi(orderCreatedEvent) Publish ediyoruz yani yayınlıyoruz.
             });
 
 
