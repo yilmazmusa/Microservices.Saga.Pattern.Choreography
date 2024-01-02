@@ -16,13 +16,12 @@ namespace Order.API
             var builder = WebApplication.CreateBuilder(args);
 
 
-
             builder.Services.AddControllers(); //mİCROSERVİCE İLE ÇALIŞACAĞIMIZDAN DOLAYI BURAYI YORUM SATIRI YAPTIK.LAZIM OLMAYAN MIDDLEWARELERİ KALDIRIYORUZ YANİ
 
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
-            builder.Services.AddMassTransit(configurator =>
+            builder.Services.AddMassTransit(configurator =>  // Burda MassTransit.RabbitMQ yu kurduk
             {
                 configurator.UsingRabbitMq((context, _configure) =>
                 {
@@ -48,13 +47,14 @@ namespace Order.API
             {
                 Order.API.Models.Order order = new()
                 {
-                    BuyerId = Guid.TryParse(model.BuyerId, out Guid _buyerId) ? _buyerId : Guid.NewGuid(), //Client'ten gelen veri Guid'e çevrilebiliyorsa çevir ve ata, çevrilemiyorsa yeni bir Guid oluştur ve ata.
+                    BuyerId = Guid.TryParse(model.BuyerId, out Guid _buyerId) ? _buyerId : Guid.NewGuid(), //Client'ten gelen veri Guid'e çevrilebiliyorsa çevir Guid tipinde _buyerId değerine ata onu da BuyerId ye ata, çevrilemiyorsa yeni bir Guid oluştur ve ata.
                     OrderItems = model.OrderItems.Select(oi => new Order.API.Models.OrderItem()
                     {
 
                         ProductId = Guid.TryParse(oi.ProductId, out Guid _productId) ? _productId : Guid.NewGuid(),
                         Count = oi.Count,
                         Price = oi.Price
+
                     }).ToList(), // Yukarda tip dönüşümü yaparken Select yaptık Select bize IEnumarable döner ama biz List bekliyoruz çünkü OrderItems List türünden o yüzden ToList() dedik.                               
                     OrderStatus = OrderStatus.Suspend,
                     CreatedDate = DateTime.UtcNow,

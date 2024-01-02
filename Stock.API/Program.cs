@@ -1,5 +1,7 @@
-
+﻿
 using MassTransit;
+using Shared.QueueNames;
+using Stock.API.Consumers;
 using Stock.API.Services;
 
 namespace Stock.API
@@ -19,9 +21,14 @@ namespace Stock.API
 
             builder.Services.AddMassTransit(configurator =>
             {
+                //MassTransit artık bunun Consumer olduğunu biliyor.Yani OrderCreatedEventConsumer un subscribe(abone) olduğu
+                //OrderCreatedEvent ilgili kuyruğa(o kuyruğu 31.satırda belirttik) yayınlandığı zaman yakalayıp burayı tetiklemesi gerektiğini biliyor.
+                configurator.AddConsumer<OrderCreatedEventConsumer>(); 
+
                 configurator.UsingRabbitMq((context, _configure) =>
                 {
                     _configure.Host(builder.Configuration["RabbitMQ"]);
+                    _configure.ReceiveEndpoint(RabbitMQSettings.Stock_OrderCreatedEventQueue, e => e.ConfigureConsumer<OrderCreatedEventConsumer>(context));
                 });
             });
 
