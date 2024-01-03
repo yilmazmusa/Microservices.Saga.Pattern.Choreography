@@ -6,6 +6,8 @@ using Order.API.ViewModels;
 using Order.API.Enums;
 using Shared.Events;
 using Shared.Messages;
+using Order.API.Consumers;
+using Shared.QueueNames;
 
 namespace Order.API
 {
@@ -23,10 +25,18 @@ namespace Order.API
 
             builder.Services.AddMassTransit(configurator =>  // Burda MassTransit.RabbitMQ yu kurduk
             {
+                configurator.AddConsumer<PaymentCompletedEventConsumer>();
+                configurator.AddConsumer<PaymentFailedEventConsumer>();
+                configurator.AddConsumer<StockNotReservedEventConsumer>();
                 configurator.UsingRabbitMq((context, _configure) =>
                 {
                     _configure.Host(builder.Configuration["RabbitMQ"]);
+                    _configure.ReceiveEndpoint(RabbitMQSettings.Order_PaymentCompletedEventQueue, e => e.ConfigureConsumer<PaymentCompletedEventConsumer>(context)); // Burda kuyruk bu o kuyruğuda dinleyen Consumer bu diyoruz.
+                    _configure.ReceiveEndpoint(RabbitMQSettings.Order_PaymentFailedEventQueue, e => e.ConfigureConsumer<PaymentFailedEventConsumer>(context));
+                    _configure.ReceiveEndpoint(RabbitMQSettings.Order_StockNotReservedEventQueue, e => e.ConfigureConsumer<StockNotReservedEventConsumer>(context));
+                
                 });
+                
             });
 
             builder.Services.AddDbContext<OrderAPIDbContext>(options => options.UseSqlServer(
@@ -96,3 +106,4 @@ namespace Order.API
         }
     }
 }
+
