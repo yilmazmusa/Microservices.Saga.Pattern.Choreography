@@ -75,7 +75,7 @@ namespace Order.API
 
                     }).ToList(), // Yukarda tip dönüşümü yaparken Select yaptık Select bize IEnumarable döner ama biz List bekliyoruz çünkü OrderItems List türünden o yüzden ToList() dedik.                               
                     OrderStatus = OrderStatus.Suspend,
-                    CreatedDate = DateTime.UtcNow,
+                    CreatedDate = DateTime.Now,
                     TotalPrice = model.OrderItems.Sum(oi => oi.Price * oi.Count), // Mesela 3 tane 6000 tl lik koltuk sipariş ettiğinde gibi
 
                 };
