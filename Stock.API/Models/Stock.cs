@@ -10,14 +10,15 @@ namespace Stock.API.Models
         public Guid Id { get; set; }
 
 
-        [BsonGuidRepresentation(MongoDB.Bson.GuidRepresentation.CSharpLegacy)]
+        [BsonRepresentation(MongoDB.Bson.BsonType.String)]
         [BsonElement(Order = 1)]
-        public Guid ProductId { get; set; }
+        public string ProductId { get; set; }
 
 
         [BsonRepresentation(MongoDB.Bson.BsonType.Int64)]
         [BsonElement(Order = 2)]
         public int Count { get; set; }
+
 
 
         [BsonRepresentation(MongoDB.Bson.BsonType.DateTime)]
