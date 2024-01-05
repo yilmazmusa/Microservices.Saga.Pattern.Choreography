@@ -12,8 +12,6 @@ using Payment.API.Consumers;
 
 using Order.API.Consumers;
 using Shared.QueueNames;
-
-
 namespace Order.API
 {
     public class Program
@@ -31,10 +29,6 @@ namespace Order.API
             builder.Services.AddMassTransit(configurator =>  // Burda MassTransit.RabbitMQ yu kurduk
             {
 
-                configurator.UsingRabbitMq((context, _configure) =>
-                {
-                    _configure.Host(builder.Configuration["RabbitMQ"]);
-
                 configurator.AddConsumer<PaymentCompletedEventConsumer>();
                 configurator.AddConsumer<PaymentFailedEventConsumer>();
                 configurator.AddConsumer<StockReservedEventConsumer>();
@@ -50,7 +44,7 @@ namespace Order.API
 
 
                 });
-                
+
             });
 
             builder.Services.AddDbContext<OrderAPIDbContext>(options => options.UseSqlServer(
@@ -81,7 +75,7 @@ namespace Order.API
 
                     }).ToList(), // Yukarda tip dönüşümü yaparken Select yaptık Select bize IEnumarable döner ama biz List bekliyoruz çünkü OrderItems List türünden o yüzden ToList() dedik.                               
                     OrderStatus = OrderStatus.Suspend,
-                    CreatedDate = DateTime.Now,
+                    CreatedDate = DateTime.UtcNow,
                     TotalPrice = model.OrderItems.Sum(oi => oi.Price * oi.Count), // Mesela 3 tane 6000 tl lik koltuk sipariş ettiğinde gibi
 
                 };
@@ -120,4 +114,3 @@ namespace Order.API
         }
     }
 }
-

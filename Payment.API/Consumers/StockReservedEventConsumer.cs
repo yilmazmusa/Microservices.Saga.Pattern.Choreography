@@ -20,7 +20,7 @@ namespace Payment.API.Consumers
         public async Task Consume(ConsumeContext<StockReservedEvent> context)
         {
 
-            if (true)
+            if (false)
 
             {//Ödeme Başarılıysa(Bankaya vs gitme işlemlerini yapmamak için direk başarılıymış gibi yaptık)
 
