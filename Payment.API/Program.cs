@@ -1,5 +1,9 @@
-﻿using MassTransit;
-using Shared.Events;
+
+
+using MassTransit;
+using Payment.API.Consumers;
+using Shared.QueueNames;
+
 
 namespace Payment.API
 {
@@ -10,43 +14,41 @@ namespace Payment.API
             var builder = WebApplication.CreateBuilder(args);
 
 
+            // Add services to the container.
+
+            builder.Services.AddControllers();
+            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+            builder.Services.AddEndpointsApiExplorer();
+            builder.Services.AddSwaggerGen();
+
             builder.Services.AddMassTransit(configurator =>
             {
+                configurator.AddConsumer<StockReservedEventConsumer>();
                 configurator.UsingRabbitMq((context, _configure) =>
                 {
                     _configure.Host(builder.Configuration["RabbitMQ"]);
+                    _configure.ReceiveEndpoint(RabbitMQSettings.Payment_StockReservedEventQueue, e => e.ConfigureConsumer<StockReservedEventConsumer>(context));
                 });
             });
 
-            // Add services to the container.
-            //builder.Services.AddControllersWithViews();
-
             var app = builder.Build();
 
-            //Configure the HTTP request pipeline.
-            if (!app.Environment.IsDevelopment())
+            // Configure the HTTP request pipeline.
+            if (app.Environment.IsDevelopment())
             {
-                app.UseExceptionHandler("/Home/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-                app.UseHsts();
+                app.UseSwagger();
+                app.UseSwaggerUI();
             }
 
-
-
-            app.UseHttpsRedirection(); // GEREK YOK.LAZIM OLMAYAN MIDDLEWARELERİ KALDIRIYORUZ YANİ
-            app.UseStaticFiles();
-
-            app.UseRouting();
+            app.UseHttpsRedirection();
 
             app.UseAuthorization();
 
-            app.MapControllerRoute( // GEREK YOK.LAZIM OLMAYAN MIDDLEWARELERİ KALDIRIYORUZ YANİ
-                name: "default",
-                pattern: "{controller=Home}/{action=Index}/{id?}");
+
+            app.MapControllers();
 
             app.Run();
 
-            //CONTROLLER değil Minimall apileri kullandığımız için yukardaki bazı yerleri yorum satırına aldık.
         }
     }
 }
