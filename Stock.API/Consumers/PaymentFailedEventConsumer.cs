@@ -20,12 +20,16 @@ namespace Stock.API.Consumers
 
             foreach (var orderItem in context.Message.OrderItems)
             {
-                var product = await ((await stockCollection.FindAsync(s => s.ProductId == orderItem.ProductId)).FirstOrDefaultAsync());
+
+                var product = await ((await stockCollection.FindAsync(s => s.ProductId == orderItem.ProductId.ToString())).FirstOrDefaultAsync());
+
 
                 if (product != null)
                 {
                     product.Count += orderItem.Count; // Ödemesi başarısız olan ürünün count(stok) bilgisini tekrar eski haline getirdik.Çünkü ürün satılmadı ödeme başarısız oldu
-                    stockCollection.FindOneAndReplaceAsync(s => s.ProductId == orderItem.ProductId, product); // Güncelleme işlemini VERİTABANINA yansıttık.(Client tarafından siparişte istenilen ama ödemesi başarısız olan product ın count bilgisini güncelle dedik.)
+
+                    stockCollection.FindOneAndReplaceAsync(s => s.ProductId == orderItem.ProductId.ToString(), product); // Güncelleme işlemini VERİTABANINA yansıttık.(Client tarafından siparişte istenilen ama ödemesi başarısız olan product ın count bilgisini güncelle dedik.)
+
                 }
               
             }

@@ -8,6 +8,11 @@ using Shared.Events;
 using Shared.Messages;
 using Order.API.Consumers;
 using Shared.QueueNames;
+using Payment.API.Consumers;
+
+using Order.API.Consumers;
+using Shared.QueueNames;
+
 
 namespace Order.API
 {
@@ -25,16 +30,25 @@ namespace Order.API
 
             builder.Services.AddMassTransit(configurator =>  // Burda MassTransit.RabbitMQ yu kurduk
             {
+
+                configurator.UsingRabbitMq((context, _configure) =>
+                {
+                    _configure.Host(builder.Configuration["RabbitMQ"]);
+
                 configurator.AddConsumer<PaymentCompletedEventConsumer>();
                 configurator.AddConsumer<PaymentFailedEventConsumer>();
+                configurator.AddConsumer<StockReservedEventConsumer>();
                 configurator.AddConsumer<StockNotReservedEventConsumer>();
                 configurator.UsingRabbitMq((context, _configure) =>
                 {
                     _configure.Host(builder.Configuration["RabbitMQ"]);
                     _configure.ReceiveEndpoint(RabbitMQSettings.Order_PaymentCompletedEventQueue, e => e.ConfigureConsumer<PaymentCompletedEventConsumer>(context)); // Burda kuyruk bu o kuyruğuda dinleyen Consumer bu diyoruz.
                     _configure.ReceiveEndpoint(RabbitMQSettings.Order_PaymentFailedEventQueue, e => e.ConfigureConsumer<PaymentFailedEventConsumer>(context));
+                    _configure.ReceiveEndpoint(RabbitMQSettings.Payment_StockReservedEventQueue, e => e.ConfigureConsumer<StockReservedEventConsumer>(context));
                     _configure.ReceiveEndpoint(RabbitMQSettings.Order_StockNotReservedEventQueue, e => e.ConfigureConsumer<StockNotReservedEventConsumer>(context));
                 
+
+
                 });
                 
             });
@@ -67,7 +81,7 @@ namespace Order.API
 
                     }).ToList(), // Yukarda tip dönüşümü yaparken Select yaptık Select bize IEnumarable döner ama biz List bekliyoruz çünkü OrderItems List türünden o yüzden ToList() dedik.                               
                     OrderStatus = OrderStatus.Suspend,
-                    CreatedDate = DateTime.UtcNow,
+                    CreatedDate = DateTime.Now,
                     TotalPrice = model.OrderItems.Sum(oi => oi.Price * oi.Count), // Mesela 3 tane 6000 tl lik koltuk sipariş ettiğinde gibi
 
                 };
