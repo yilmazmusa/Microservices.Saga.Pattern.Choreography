@@ -1,7 +1,9 @@
 
+
 using MassTransit;
 using Payment.API.Consumers;
 using Shared.QueueNames;
+
 
 namespace Payment.API
 {
@@ -10,6 +12,7 @@ namespace Payment.API
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+
 
             // Add services to the container.
 
@@ -45,6 +48,7 @@ namespace Payment.API
             app.MapControllers();
 
             app.Run();
+
         }
     }
 }

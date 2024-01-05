@@ -8,10 +8,12 @@ namespace Order.API.Consumers
     {
         readonly OrderAPIDbContext _orderAPIDbContext; // Stock yoksa ilgili siparişin durumunu VT da Fail e çekmek için VT kullanmamız gerekli
 
+
         public StockNotReservedEventConsumer(OrderAPIDbContext orderAPIDbContext)
         {
             _orderAPIDbContext = orderAPIDbContext;
         }
+
 
         public async Task Consume(ConsumeContext<StockNotReservedEvent> context)
         {

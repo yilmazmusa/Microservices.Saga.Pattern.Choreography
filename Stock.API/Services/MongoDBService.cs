@@ -18,7 +18,7 @@ namespace Stock.API.Services
         public IMongoCollection<T> GetCollection<T>() => _mongoDatabase.GetCollection<T>(typeof(T).Name.ToLowerInvariant());
         //Şimdi yukarda diyoruzki;
         //Ben MongoDB database'ime gidip GetCollection metodu ile  ordan data/collection çekicem diyorum.
-        //Ama Benim MongoDB database'imde birden fazla türde Ürün/Product olabilir.
+        //Ama Benim MongoDB database'imde birden fazla türde Ürün/Product olabilir.O yüzden  typeof(T).Name.ToLowerInvariant() diyoruz yani name i küçült ve name inden yakala
         //O yüzden çekeceğim ürünün tipi ne ise generic onu karşıla diyorum T ile
         //Yani MongoDB database'den Elma çektim tipi Elma olacak, Armut çektim Armut olucak.
     }

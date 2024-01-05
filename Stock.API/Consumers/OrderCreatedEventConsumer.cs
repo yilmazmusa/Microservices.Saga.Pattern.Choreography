@@ -30,8 +30,10 @@ namespace Stock.API.Consumers
 
             foreach (var orderItemMessage in context.Message.OrderItemsMessage)
             {//Clientte gelen ürünId sinden ve miktarından VT var mı kontrolü.Varsa true, yoksa false  ekleyecek boolean tipindeki lsiteye
+
                 stockResult.Add(await (await stockCollection.FindAsync(s => s.ProductId == orderItemMessage.ProductId.ToString() &&
                                                  s.Count >= (long)orderItemMessage.Count)).AnyAsync());
+
             }
 
             if (stockResult.TrueForAll(s => s.Equals(true)))
@@ -42,16 +44,20 @@ namespace Stock.API.Consumers
                 //Stock Güncellemesi yapılır
                 foreach (var orderItemMessage in context.Message.OrderItemsMessage)
                 {//Requestte gelen ve VT bir ProductId ile eşleşen productı aldık stock a attık.Artık bunun Count  bilgisini vs güncelleyebiliriz.
+
                     Models.Stock product = await (await stockCollection.FindAsync(s => s.ProductId == orderItemMessage.ProductId.ToString())).FirstOrDefaultAsync();
 
                     product.Count -= orderItemMessage.Count; //Count bilgisini siparişte gelen kadar düşürdük.
 
                     stockCollection.FindOneAndReplaceAsync(s => s.ProductId == orderItemMessage.ProductId.ToString(), product);
 
+
                 }
 
                 //Payment.API yi tetikleyecek event yayınlanır
+
                 var sendEndpoint = await _sendEndpointProvider.GetSendEndpoint(new Uri($"queue:{RabbitMQSettings.Payment_StockReservedEventQueue}")); // Event'in hangi kuyruğa gönderileceğini belirledik.
+
 
                 StockReservedEvent stockReservedEvent = new() //Kuyruğa göndereceğimiz Event'in mesaj içeriğinide belirledik.
                 {
